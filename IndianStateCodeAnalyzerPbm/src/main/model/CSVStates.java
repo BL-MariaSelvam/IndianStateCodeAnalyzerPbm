@@ -9,12 +9,11 @@ import main.java.CensusAnalyserException;
 
 public class CSVStates {
 
+    private static final String EXPECTED_HEADER = "SrNo,StateName,TIN,StateCode";
     private static final int EXPECTED_COLUMN_COUNT = 4;
 
-    public Iterator<StateCode> loadCSVData(String csvFilePath)
-            throws CensusAnalyserException {
+    public Iterator<StateCode> loadCSVData(String csvFilePath) throws CensusAnalyserException {
 
-        // File type validation
         if (!csvFilePath.endsWith(".csv")) {
             throw new CensusAnalyserException(
                     "Invalid file type",
@@ -25,12 +24,17 @@ public class CSVStates {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
 
-            // Skip header
-            reader.readLine();
+            String header = reader.readLine();
+
+            // Header validation
+            if (!EXPECTED_HEADER.equals(header)) {
+                throw new CensusAnalyserException(
+                        "Incorrect CSV header",
+                        CensusAnalyserException.ExceptionType.CSV_HEADER_ERROR);
+            }
+
             String line;
-
             while ((line = reader.readLine()) != null) {
-
                 String[] data = line.split(",");
 
                 if (data.length != EXPECTED_COLUMN_COUNT) {
@@ -45,7 +49,6 @@ public class CSVStates {
                         Integer.parseInt(data[2].trim()),
                         data[3].trim()
                 );
-
                 stateCodeList.add(stateCode);
             }
 
@@ -58,4 +61,5 @@ public class CSVStates {
         return stateCodeList.iterator();
     }
 }
+
 
